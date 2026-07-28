@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c0804">
+<title>Αἱ Σωκρατικαὶ πράξεις Ἱλαρίου</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overscroll-behavior: none; }
+  body { background: #0c0804; font-family: 'Lora', serif; }
+  ::-webkit-scrollbar { width: 2px; }
+  ::-webkit-scrollbar-thumb { background: #3a2810; border-radius: 2px; }
+  a { color: #c9a96e; }
+  a:hover { color: #e8d5a3; }
+
+  .app { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+
+  .titlebar {
+    flex-shrink: 0; text-align: center;
+    padding: calc(env(safe-area-inset-top, 0px) + 6px) 12px 7px;
+    background: #0a0704; border-bottom: 1px solid #1c1408; position: relative; z-index: 20;
+  }
+  .titlebar span {
+    font-family: 'Playfair Display', serif; font-size: 12.5px; font-style: italic;
+    color: #7a5a24; letter-spacing: .04em; line-height: 1.3;
+  }
+
+  .main-row { flex: 1; min-height: 0; display: flex; overflow: hidden; }
+
+  .sidebar {
+    width: 68px; flex-shrink: 0; display: flex; flex-direction: column;
+    background: linear-gradient(180deg, #130f08, #0d0a05);
+    border-right: 1px solid #201508; z-index: 10;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; border-bottom: 1px solid #1c1409; }
+  .tab-active { background: linear-gradient(160deg, #d9b46a, #c9a96e, #b58d40); border-bottom: 1px solid rgba(0,0,0,.35); cursor: default; gap: 8px; }
+  .tab-active span { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #1a0d04; line-height: 1; }
+  .tab-locked { background: #0e0b06; }
+  .tab-locked span { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #4a3418; line-height: 1; }
+
+  .content { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+  .content-header {
+    flex-shrink: 0; padding: 11px 18px 10px;
+    background: linear-gradient(180deg, rgba(9,6,2,.97) 65%, rgba(9,6,2,.82));
+    border-bottom: 1px solid #1c1408;
+  }
+  .content-header-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .title-group { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; flex: 1; min-width: 0; }
+  .title-greek { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; font-style: italic; color: #c9a96e; line-height: 1.15; letter-spacing: -.01em; }
+  .title-translit { font-family: 'Lora', serif; font-size: 11px; color: #C9A96E; letter-spacing: .03em; }
+  .translate-btn {
+    flex-shrink: 0; background: transparent; border: 1px solid #2a1f0e; color: #8b6a32;
+    font-family: 'Lora', serif; font-size: 8px; padding: 5px 9px; cursor: pointer; border-radius: 2px;
+    letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; line-height: 1;
+  }
+  .translate-btn:active { opacity: .85; }
+
+  .body-wrap { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+  .scroll-area {
+    position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 18px calc(50px + env(safe-area-inset-bottom, 0px)) 18px;
+  }
+  .scroll-area p {
+    font-family: 'Lora', serif; font-size: 14.5px; line-height: 1.88; color: #b8a878;
+    margin-bottom: 4px; text-wrap: pretty; text-align: justify;
+  }
+  .verse {
+    font-family: 'Playfair Display', serif; font-size: 14px; font-style: italic; color: #c9a96e;
+    line-height: 2.1; padding: 16px 20px; margin-bottom: 4px; border-left: 2px solid #2a1f0e; opacity: .88;
+  }
+  .verse br + br { content: ""; }
+  .footer-mark { text-align: center; padding: 4px 0 6px; }
+  .footer-mark span {
+    font-family: 'Playfair Display', serif; font-size: 10.5px; color: #3a2810;
+    letter-spacing: .3em; font-style: italic;
+  }
+
+  .statue { width: calc(100% + 36px); margin: 22px -18px; height: calc((100vw - 68px) * 0.5625);
+    background-size: contain; background-repeat: no-repeat; display: block; flex-shrink: 0;
+    opacity: 0; transition: opacity .6s ease;
+  }
+  .statue.loaded { opacity: var(--op, .7); }
+  #s1 { background-position: 68% center; --op: .72; }
+  #s2 { background-position: center 55%; --op: .70; }
+  #s3 { background-position: center 12%; --op: .72; }
+  #s4 { background-position: center 35%; --op: .70; }
+
+  [hidden] { display: none !important; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center;
+    background: rgba(6,3,1,.72); backdrop-filter: blur(1.5px); padding: 28px 20px;
+  }
+  .overlay-box { width: 100%; max-width: 340px; text-align: center; }
+  .overlay-rule { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
+  .overlay-rule .line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #3a2810); }
+  .overlay-rule .line.rev { background: linear-gradient(90deg, #3a2810, transparent); }
+  .overlay-rule span { font-size: 9px; color: #5a3e1a; letter-spacing: .3em; font-family: 'Lora', serif; text-transform: uppercase; }
+  .overlay-title { font-family: 'Playfair Display', serif; font-size: 19px; font-style: italic; font-weight: 700; color: #c9a96e; line-height: 1.4; margin-bottom: 18px; }
+  .overlay-msg { font-family: 'Lora', serif; font-size: 14px; color: #b8a878; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="titlebar"><span>Αἱ Σωκρατικαὶ πράξεις Ἱλαρίου</span></div>
+
+  <div class="main-row">
+    <nav class="sidebar">
+      <div class="tab tab-active"><span>1</span></div>
+      <div class="tab tab-locked">
+        <span>2</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3a2810" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <div class="tab tab-locked">
+        <span>3</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3a2810" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <div class="tab tab-locked">
+        <span>4</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3a2810" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <div class="tab tab-locked">
+        <span>5</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3a2810" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+    </nav>
+
+    <div class="content">
+      <div class="content-header">
+        <div class="content-header-row">
+          <div class="title-group">
+            <div class="title-greek" id="titleGreek">Τί ἐστί</div>
+            <div class="title-translit" id="titleTranslit">Ti estì</div>
+          </div>
+          <button class="translate-btn" id="translateBtn">TRADUZIONE</button>
+        </div>
+      </div>
+
+      <div class="body-wrap">
+        <div class="scroll-area">
+
+          <div id="textGreek">
+            <p>Εἰ ἀκριβῶς ἐξετάζοιμεν τὰς τῶν παλαιῶν πηγάς, ἀναφαίνεται ἡμῖν ὁ Σωκράτης οὐχ οἷος ὑπὸ τῶν ἐν ταῖς διατριβαῖς δοξάζεται σεμνός τις ὤν, ἀλλὰ μᾶλλον ἀνὴρ θαυμαστῆς τε καὶ γελοίας ἀτοπίας πλέως. Ὁ γὰρ Πλάτων ἐν τῷ Συμποσίῳ (215a-b) διὰ τοῦ Ἀλκιβιάδου, μάλα νή Δία μεθύοντος, χαλεπήν μέν, ἡδεῖαν δὲ τὴν τοῦ σώματος μορφὴν παραδίδωσιν· αἴσχιστος γὰρ ὢν ἐφαίνετο, τούς τε ὀφθαλμοὺς ἐξωφθάλμους ἔχων καὶ τὴν ῥῖνα σιμήν, ὥστε εἰκάζεσθαι μὲν τοῖς ἀτοπωτάτοις Σιληνοῖς, ὁμοιοῦσθαι δὲ τῇ θαλαττίᾳ νάρκῃ, ἥτις τῷ ὄντι ναρκᾶν ποιεῖ τε καὶ παραλύει τὸ στόμα παντὸς τοῦ ἐλέγχειν αὐτὸν πειρωμένου (ταύτην δὲ τὴν εἰκόνα καὶ ἐν τῷ Μένωνι εὑρίσκομεν, 80a).</p>
+            <div class="statue" id="s3"></div>
+            <p>Ταύτῃ δὲ τῇ ἀτοπίᾳ τοῦ εἴδους ἀντετάττετο ἡ τῆς ψυχῆς καρτερία, σχεδὸν γελοία οὖσα διὰ τὴν ὑπερβολήν. Ὁ γὰρ αὐτὸς Ἀλκιβιάδης διηγεῖται αὐτοῦ θαυμαστήν τινα μέριμναν ἐν τῇ στρατείᾳ τῇ ἐν Ποτιδαίᾳ (432 π.Χ.)· ὁ γὰρ Σωκράτης ἕωθεν φροντίζων τι τῶν λογικῶν προβλημάτων εἱστήκει ἀκίνητος ὥσπερ ἀνδριάς, μίαν ἡμέραν καὶ νύκτα διατελῶν. Τὸ δὲ πρᾶγμα οὕτω παράδοξον ἦν ὥστε οἱ Ἰωνικοὶ στρατιῶται, ἐκπλαγέντες, τὰ χαμεύνια ἐξεκόμιζον ἵνα ἐν ὑπαίθρῳ καθεύδοντες φυλάττοιέν τε αὐτὸν καὶ στοχάζοιεν πότε κινηθήσεται· ὁ δὲ φιλόσοφος τῇ ὑστεραίᾳ ἅμα τῷ ἡλίῳ ἀνίσχοντι ἀπηλλάττετο, προσευξάμενος τῷ Ἡλίῳ ὥσπερ οὐδὲν δεινὸν παθών (Συμπόσιον, 220a-d).</p>
+            <div class="statue" id="s1"></div>
+            <p>Ὀλιγωρῶν δὲ τῆς τῶν ἄλλων δόξης, ὁ Σωκράτης ἀνυπόδητος ἀεὶ ἐν ταῖς Ἀθήναις περιεπάτει – καὶ διὰ τοῦ χειμῶνος τοῦ ἐν Θρᾴκη ἐπὶ τοῦ κρυστάλλου – καὶ τὸν αὐτὸν τρίβωνα δι' ἔτους ἐφόρει. Διογένης δὲ ὁ Λαέρτιος (Περὶ βίων καὶ δογμάτων τῶν ἐν φιλοσοφίᾳ εὐδοκιμησάντων, ΙΙ, 25) λέγει αὐτὸν χαίρειν φοιτῶντα εἰς τὴν ἀγοράν, οὐκ ἐπὶ τῷ πρίασθαί τι, ἀλλ' ἵνα τὰ ὤνια θεώμενος μάλα γεγηθὼς λέγοι· «Πόσα μοι οὐκ ἀναγκαῖά ἐστιν».</p>
+            <p>Οὐδὲ ὁ οἴκοι βίος ἧττον γελοῖος ἦν διὰ τὴν πρὸς τὴν γυναῖκα Ξανθίππην χαλεπὴν κοινωνίαν. Ὁ γὰρ αὐτὸς Λαέρτιος (ΙΙ, 36) παραδίδωσιν ἡμῖν ἐκείνην τὴν θρυλουμένην στάσιν· ἡ γὰρ Ξανθίππη, ἐπειδὴ λοιδοροῦσα αὐτὸν οὐδὲν τῆς ἡσυχίας ἐκίνησε, τέλος ἐκχέασα ὅλον ὕδωρ ἀκάθαρτον κατὰ τῆς κεφαλῆς αὐτοῦ κατεσκέδασεν. Ὁ δὲ Σωκράτης, διάβροχος γενόμενος ἐναντίον τῶν παριόντων, ἔσκωψεν εἰπών· «Οὐκ ἔλεγον ὅτι Ξανθίππη βροντῶσα καὶ ὕδωρ ποιήσει;» Καὶ μὴν καὶ Ξενοφῶν ἐν τῷ Συμποσίῳ (ΙΙ, 10) γράφει τὸν φιλόσοφον ὁμολογοῦντα ὅτι ταύτην ἔγημεν ἄσκησιν ποιούμενος· εἰ γὰρ δύναιτο ἐκείνην ὑπομένειν, ῥᾳδίως ἂν παντί τῳ τρόπῳ ἐν Ἀθήναις χρῷτο.</p>
+            <div class="statue" id="s4"></div>
+            <p>Ἐν δὲ τῷ τοῦ Ξενοφῶντος Συμποσίῳ (V) μανθάνομεν ὅπως ὁ Σωκράτης ἔχαιρεν παίζων. Εἰ γὰρ καὶ οὐδέποτε ἔπαιζε τὰ τῶν παίδων γυμνάσια, οἷον τὴν ὀστρακίνδαν, ἐν τοῖς δείπνοις ὅμως βασιλεὺς ἦν τῶν ζητήσεων καὶ τῶν γρίφων. Ἐν γὰρ ἐκείνῃ τῇ ἡδείᾳ σκηνῇ ὁρῶμεν αὐτὸν ἀγῶνα κάλλους ποιούμενον πρὸς τὸν Κριτίαν, νέον τε καὶ κάλλιστον ὄντα· ὁ δὲ Σωκράτης, τῇ εἰωθυίᾳ ἀναιδείᾳ χρώμενος, ἀποφαίνει ἑαυτὸν καλλίω εἶναι ὅτι οἱ μὲν ἐξώφθαλμοι ὀφθαλμοὶ παρέχουσιν αὐτῷ τὸ πλάγιον βλέπειν (ὥσπερ οἱ χαμαιλέοντες), οἱ δὲ μυκτῆρες ἀναπεπταμένοι ὀσφραίνεσθαι ἀμείνονες εἰσίν. Πᾶς οὖν ὁ τοῦ Σωκράτους βίος οὐδὲν ἄλλο ἦν ἢ ἀκριβής τις καὶ ἡδίστη ζήτησις τῆς Ἀληθείας, οὐ διὰ γεωγραφικῶν πινάκων γιγνομένη, ἀλλὰ τῷ λογικῷ κοχλίᾳ τῆς συλήσεως καὶ τῆς ἐλεγκτικῆς τὰς τῶν πολιτῶν δόξας ἀνατρέπουσα.</p>
+            <div class="statue" id="s2"></div>
+            <p style="margin-bottom:10px">Ἡμέρᾳ δέ τινι ὁ Σωκράτης περιπατῶν ἐνεπνεύσθη καὶ τάδε τὰ ἔπη τῷ κόσμῳ κατέλιπε γεγραμμένα·</p>
+            <div class="verse">
+              Γελοῖος, γελοῖος ὁ βαδισμὸς αὐτοῦ,<br><br>
+              οὐ μέλει αὐτῷ τῆς εἱμαρμένης ἑαυτοῦ.<br><br>
+              Ἄνω κάτω, ἐντεῦθεν κἀκεῖσε βαδίζει,<br><br>
+              ἀλλ' οὐδέποτε ἵσταται οὗ ἔδει.<br><br>
+              Σχεδὸν οὐδέποτε ἡσύχιον αὐτὸν εὑρήσεις,<br><br>
+              ἀλλ' ἡ φωνὴ αὐτοῦ γλυκεῖά ἐστι καὶ κρύφιος.<br><br>
+              Ὁ τυφὼν πολέμιός ἐστιν αὐτῷ μέγιστος,<br><br>
+              ὑπὸ δὲ τῇ καθέδρᾳ τὸ παλαιὸν κρυπτήριον αὐτοῦ.
+            </div>
+          </div>
+
+          <div id="textItalian" hidden>
+            <p>Se esaminiamo da vicino le fonti primarie della classicità, emerge il ritratto di un Socrate lontano dalle austere idealizzazioni accademiche, dipinto piuttosto come un uomo di straordinaria, divertente stravaganza. Il celebre dialogo platonico del Simposio (215a-b) ci consegna, per bocca di un Alcibiade decisamente brillo, una descrizione spietata ma spassosa delle sue fattezze: un uomo decisamente brutto, con gli occhi sporgenti e il naso schiacciato all'insù, paragonato a un grottesco sileno (una sorta di satiro mitologico) o a una torpedine marina (nárke), capace di dare una vera e propria scossa elettrica e «paralizzare» la bocca di chiunque tentasse di sfidarlo (immagine che ritroveremo anche nel Menone, 80a).</p>
+            <div class="statue statue-clone" data-src="s3"></div>
+            <p>A questo aspetto bizzarro faceva riscontro una tempra fisica quasi comica nella sua assurdità. Lo stesso Alcibiade descrive una sua leggendaria trance meditativa durante la spedizione militare a Potidea (432 a.C.): Socrate si bloccò all'alba a riflettere su un problema logico e rimase lì, immobile come una statua, per un giorno e una notte intera. La scena doveva essere surreale, tanto che i soldati ionici, sbalorditi, portarono i loro giacigli all'aperto solo per accamparsi a guardarlo e scommettere su quando si sarebbe mosso; il filosofo si riscosse solo all'alba successiva, salutò il sole con una preghiera e se ne andò come se nulla fosse (Simposio, 220a-d).</p>
+            <div class="statue statue-clone" data-src="s1"></div>
+            <p>Incurante del giudizio altrui, Socrate girava per Atene sempre a piedi scalzi – persino sul ghiaccio dell'inverno in Tracia – e con lo stesso mantello logoro tutto l'anno. Diogene Laerzio (Vite e dottrine dei filosofi illustri, II, 25) ci racconta che amasse frequentare il mercato non per comprare, ma per guardare le bancarelle ed esclamare tutto soddisfatto: «Quante cose ci sono di cui non ho bisogno!».</p>
+            <p>La sua vita domestica non era da meno in quanto a picchi di comicità, a causa del rapporto burrascoso con la moglie Santippe. Lo stesso Laerzio (II, 36) ci tramanda l'iconico aneddoto di una loro furente lite: dopo averlo bersagliato di insulti senza scalfirne la calma, Santippe perse la testa e gli svuotò un intero catino d'acqua sporca daccapo. Socrate, bagnato fradicio davanti ai passanti, si limitò a ironizzare: «Sapevo che dopo tanto tuonare sarebbe arrivata la pioggia!». D'altronde, come registrato anche da Senofonte nel suo Simposio (II, 10), il filosofo confessava di averla sposata per puro addestramento: se riusciva a sopportare lei, avrebbe potuto gestire qualsiasi caratteraccio ad Atene.</p>
+            <div class="statue statue-clone" data-src="s4"></div>
+            <p>Ed è proprio nel Simposio di Senofonte (V) che scopriamo come Socrate amasse divertirsi. Sebbene non si sia mai cimentato in giochi fisici da bambini come l'inseguimento con i cocci (ostrakinda), nei banchetti era il re indiscusso delle «cacce al tesoro» intellettuali e dei griphi (gli indovinelli dell'epoca). In una scena esilarante, lo vediamo lanciare una finta sfida di bellezza contro il giovane e bellissimo Crizia: Socrate, con la sua tipica faccia tosta, argomenta di essere più bello perché i suoi occhi sporgenti gli garantiscono una visione laterale migliore (come i camaleonti) e le sue narici larghe captano meglio i profumi. Tutta la sua esistenza, in fondo, si configurò come una rigorosa e divertentissima caccia al tesoro della Verità, condotta non con mappe materiali, ma svitando le certezze dei suoi concittadini con il cacciavite logico della confutazione.</p>
+            <div class="statue statue-clone" data-src="s2"></div>
+            <p style="margin-bottom:10px">Socrate voleva trovare la parola magica per procedere avanti. Così un giorno passeggiando venne ispirato e lasciò scritto al mondo la seguente strofa nella pietra:</p>
+            <div class="verse">
+              Buffo, buffo è il suo cammino,<br><br>
+              non gli importa il suo destino.<br><br>
+              Va su e giù, di qua e di là,<br><br>
+              ma mai si ferma dove dovrà.<br><br>
+              Quasi mai lo trovi quieto,<br><br>
+              ma il suo suono è un dolce segreto.<br><br>
+              Il tornado è il suo gran nemico,<br><br>
+              sotto la sedia il suo nascondiglio antico.
+            </div>
+          </div>
+
+          <div class="footer-mark"><span>✦ τέλος τῆς πρώτης σχεδίας ✦</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay">
+  <div class="overlay-box">
+    <div class="overlay-rule">
+      <div class="line"></div>
+      <span>ἀνακοίνωσις</span>
+      <div class="line rev"></div>
+    </div>
+    <div class="overlay-title">Αἱ Σωκρατικαὶ πράξεις Ἱλαρίου</div>
+    <div class="overlay-msg">Spiacente, la pagina al momento non è disponibile.<br>Potrai visitarla a partire dalle 9:00 dell'08/07/2026.</div>
+  </div>
+</div>
+
+<script>
+  // Chroma-key each statue photo (green-screen / near-white background) to a transparent PNG.
+  const IMG_SRCS = { s1: 'assets/stat1.jpeg', s2: 'assets/stat2.jpeg', s3: 'assets/stat3.jpeg', s4: 'assets/stat4.jpeg' };
+
+  function chromaKey(img) {
+    const MAX = 700;
+    const sc = Math.min(1, MAX / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+    const w = Math.max(1, Math.round((img.naturalWidth || MAX) * sc));
+    const h = Math.max(1, Math.round((img.naturalHeight || MAX) * sc));
+    const cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    const ctx = cv.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      const green = g - Math.max(r, b);
+      if (green > 50) { d[i + 3] = Math.max(0, Math.round(255 * (1 - Math.min(1, (green - 50) / 70)))); continue; }
+      const dist = Math.sqrt((255 - r) ** 2 + (255 - g) ** 2 + (255 - b) ** 2);
+      if (dist < 55) d[i + 3] = Math.min(255, Math.round(dist * 4.5));
+    }
+    ctx.putImageData(imageData, 0, 0);
+    return cv.toDataURL('image/png');
+  }
+
+  function applyStatueBg(id, url) {
+    document.querySelectorAll('#' + id + ', [data-src="' + id + '"]').forEach(el => {
+      el.style.backgroundImage = 'url(' + url + ')';
+      el.classList.add('loaded');
+    });
+  }
+
+  Object.entries(IMG_SRCS).forEach(([id, src]) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { try { applyStatueBg(id, chromaKey(img)); } catch (e) { applyStatueBg(id, src); } };
+    img.onerror = () => applyStatueBg(id, src);
+    img.src = src;
+  });
+
+  // Greek / Italian toggle
+  const btn = document.getElementById('translateBtn');
+  const greekBlock = document.getElementById('textGreek');
+  const italianBlock = document.getElementById('textItalian');
+  const titleGreek = document.getElementById('titleGreek');
+  const titleTranslit = document.getElementById('titleTranslit');
+  let viewingItalian = false;
+
+  btn.addEventListener('click', () => {
+    viewingItalian = !viewingItalian;
+    greekBlock.hidden = viewingItalian;
+    italianBlock.hidden = !viewingItalian;
+    titleGreek.textContent = viewingItalian ? "Che cos'è?" : 'Τί ἐστί';
+    titleTranslit.textContent = viewingItalian ? '' : 'Ti estì';
+  });
+</script>
+</body>
+</html>
