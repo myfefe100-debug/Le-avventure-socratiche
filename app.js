@@ -162,7 +162,7 @@ function pane3Italian() {
   return `
   ${verse(['Attenzione, il compito si sdoppia:','non uno solo, ma una coppia.'])}
   ${statueImgHTML('s8')}
-  ${verse(["Cerca il luogo dove il vetro ti rende il volto,","fra tante boccette un tesoro è nascosto:","un segreto che l'acqua non ha mai raccolto,","cilindrico e leggero, dal profumo non esposto.","","Chi si muove come fosse un'ombra,","possiede nove vite, dicono, per certo,","e cela tra il suo manto qualcosa di coperto,","un mistero che la sua andatura ingombra."], {last:true})}`;
+  ${verse(["Cerca il luogo dove il vetro ti rende il volto,","fra tante boccette uno strumento è nascosto:","un rituale che l'acqua non ha mai raccolto,","bianco e morbido, dal profumo del ciliegio non esposto.","","Chi si muove come fosse un'ombra,","possiede nove vite, dicono, per certo,","e cela tra il suo manto qualcosa di coperto,","un mistero che la sua andatura ingombra."], {last:true})}`;
 }
 
 function pane4Greek() {
